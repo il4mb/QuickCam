@@ -6,12 +6,20 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.LightingColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.view.View;
+
+import com.ilhamb.quickcam.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,38 +43,40 @@ public class ImageTools {
 
     }
 
-    public void stampDateGeo () {
+    public void stampDateGeo(View view) {
 
-        int extraHeight = (int) (this.bmp.getHeight() * 0.15);
+        float scale = ctx.getResources().getDisplayMetrics().density;
 
-        Bitmap newBitmap = Bitmap.createBitmap(this.bmp.getWidth(),
-                this.bmp.getHeight() + extraHeight, Bitmap.Config.ARGB_8888);
+        Bitmap newBitmap = Bitmap.createBitmap(this.bmp.getWidth(), this.bmp.getHeight(), Bitmap.Config.ARGB_8888);
 
         Canvas canvas = new Canvas(newBitmap);
-        canvas.drawColor(Color.BLUE);
+        canvas.drawColor(Color.WHITE);
         canvas.drawBitmap(this.bmp, 0, 0, null);
 
-        Resources resources = this.ctx.getResources();
-        float scale = resources.getDisplayMetrics().density;
+        Paint paint = new Paint();
+        paint.setColor(Color.GRAY);
+        paint.setTypeface(Typeface.DEFAULT);
+        paint.setTextSize(7.5f * scale);
+        float textWidth = paint.measureText(city);
 
-        Paint pText = new Paint();
-        pText.setColor(Color.WHITE);
 
-        setTextSizeForWidth(pText,(int) (this.bmp.getHeight() * 0.10), city);
+        Bitmap icon = drawableToBitmap(ctx.getDrawable(R.drawable.ic_baseline_location_on_24));
+        icon = changeColor(icon, Color.BLACK, Color.GRAY);
+        icon = resizeBitmap(icon, (int) (15 * scale), (int) (15 * scale));
 
-        Rect bounds = new Rect();
-        pText.getTextBounds(city, 0, city.length(), bounds);
+        int width = (int) ((icon.getWidth() + textWidth) * scale),
+                height = (int) ((icon.getHeight() + 14) * scale);
 
-        int x = ((newBitmap.getWidth()-(int)pText.measureText(city))/2);
-        int h = (extraHeight+bounds.height())/2;
-        int y = (this.bmp.getHeight()+h);
+        Bitmap loc = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas1 = new Canvas(loc);
+        canvas1.drawBitmap(icon, 0, 0, null);
+        canvas1.drawText(city, 0, height, paint);
 
-        canvas.drawText(city, x, y, pText);
-
+        canvas.drawBitmap(loc, 0, 0, paint);
         this.bmp = newBitmap;
     }
 
-    public void CropPresisi () {
+    public void CropPresisi() {
 
         Random rand = new Random();
         float min = this.MinCrop;
@@ -76,8 +86,8 @@ public class ImageTools {
         int width = this.bmp.getWidth();
         int height = this.bmp.getHeight();
 
-        int X_per = (int) (width * (random/100));
-        int Y_per = (int) (height * (random/100));
+        int X_per = (int) (width * (random / 100));
+        int Y_per = (int) (height * (random / 100));
 
         int cropX = (width - X_per);
         int cropY = (height - Y_per);
@@ -89,29 +99,10 @@ public class ImageTools {
 
     }
 
-    public Bitmap getBitmap () { return this.bmp; }
-
-
-    private void setTextSizeForWidth(Paint paint, float desiredHeight,
-                                     String text) {
-
-        // Pick a reasonably large value for the test. Larger values produce
-        // more accurate results, but may cause problems with hardware
-        // acceleration. But there are workarounds for that, too; refer to
-        // http://stackoverflow.com/questions/6253528/font-size-too-large-to-fit-in-cache
-        final float testTextSize = 15f;
-
-        // Get the bounds of the text, using our testTextSize.
-        paint.setTextSize(testTextSize);
-        Rect bounds = new Rect();
-        paint.getTextBounds(text, 0, text.length(), bounds);
-
-        // Calculate the desired size as a proportion of our testTextSize.
-        float desiredTextSize = (testTextSize * desiredHeight / bounds.height()) / text.length()*2;
-
-        // Set the paint for that size.
-        paint.setTextSize(desiredTextSize);
+    public Bitmap getBitmap() {
+        return this.bmp;
     }
+
 
     private Bitmap handleSamplingAndRotationBitmap() throws IOException {
         int MAX_HEIGHT = 1024;
@@ -188,10 +179,10 @@ public class ImageTools {
                 rotateImage(90);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_180:
-                 rotateImage(180);
+                rotateImage(180);
                 break;
             case ExifInterface.ORIENTATION_ROTATE_270:
-                 rotateImage(270);
+                rotateImage(270);
         }
     }
 
@@ -202,5 +193,74 @@ public class ImageTools {
 
         this.bmp = Bitmap.createBitmap(this.bmp, 0, 0, this.bmp.getWidth(), this.bmp.getHeight(), matrix, true);
         this.bmp.recycle();
+    }
+
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        int width = drawable.getIntrinsicWidth();
+        width = width > 0 ? width : 1;
+        int height = drawable.getIntrinsicHeight();
+        height = height > 0 ? height : 1;
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
+    private Bitmap changeColor(Bitmap src, int colorToReplace, int colorThatWillReplace) {
+        int width = src.getWidth();
+        int height = src.getHeight();
+        int[] pixels = new int[width * height];
+        // get pixel array from source
+        src.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
+
+        int A, R, G, B;
+        int pixel;
+
+        // iteration through pixels
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                // get current index in 2D-matrix
+                int index = y * width + x;
+                pixel = pixels[index];
+                if (pixel == colorToReplace) {
+                    //change A-RGB individually
+                    A = Color.alpha(colorThatWillReplace);
+                    R = Color.red(colorThatWillReplace);
+                    G = Color.green(colorThatWillReplace);
+                    B = Color.blue(colorThatWillReplace);
+                    pixels[index] = Color.argb(A, R, G, B);
+                    /*or change the whole color
+                    pixels[index] = colorThatWillReplace;*/
+                }
+            }
+        }
+        bmOut.setPixels(pixels, 0, width, 0, 0, width, height);
+        return bmOut;
+    }
+
+    public Bitmap resizeBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
     }
 }

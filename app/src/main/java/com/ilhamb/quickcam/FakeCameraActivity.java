@@ -58,7 +58,7 @@ public class FakeCameraActivity extends AppCompatActivity {
                         ImageTools imageTools = new ImageTools(getApplicationContext(), data.getData());
 
                        // imageTools.CropPresisi();
-                        imageTools.stampDateGeo();
+                        imageTools.stampDateGeo(binding.frameStamp.getRoot());
 
                         handleImage(imageTools.getBitmap());
 
