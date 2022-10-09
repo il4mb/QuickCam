@@ -2,6 +2,7 @@ package com.ilhamb.quickcam;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ClipData;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -25,6 +26,7 @@ import com.google.gson.Gson;
 import com.ilhamb.quickcam.databinding.ActivityTestBinding;
 
 import java.io.File;
+import java.io.IOException;
 
 public class TestActivity extends AppCompatActivity {
 
@@ -33,6 +35,7 @@ public class TestActivity extends AppCompatActivity {
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
     ActivityTestBinding binding;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +59,7 @@ public class TestActivity extends AppCompatActivity {
     }
 
     public String photoFileName = "photo.jpg";
+    File photoFile;
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void takePictureAction() {
@@ -64,16 +68,15 @@ public class TestActivity extends AppCompatActivity {
         if (checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
             requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_CAMERA_PERMISSION_CODE);
-        }
-        else {
+        } else {
 
             // Create a File reference for future access
-            File photoFile = getPhotoFileUri(photoFileName);
+            photoFile = getPhotoFileUri(photoFileName);
 
             // wrap File object into a content provider
             // required for API >= 24
             // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-            Uri fileProvider = FileProvider.getUriForFile(this, "com.ilhamb.quickcam", photoFile);
+            Uri fileProvider = FileProvider.getUriForFile(this, "com.ilhamb.quickcam.provider", photoFile);
 
             Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
             cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
@@ -94,8 +97,7 @@ public class TestActivity extends AppCompatActivity {
                 Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
-            }
-            else {
+            } else {
 
                 Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
             }
@@ -109,9 +111,18 @@ public class TestActivity extends AppCompatActivity {
 
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
 
-            Log.d("CAMERA RESULT", new Gson().toJson(data.getExtras()));
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            binding.imageView.setImageBitmap(photo);
+            //Log.d("CAMERA RESULT", new Gson().toJson(item));
+
+            try {
+
+                Bitmap bp = MediaStore.Images.Media.getBitmap(this.getContentResolver(), Uri.fromFile(photoFile));
+                binding.imageView.setImageBitmap(bp);
+
+            }catch (Exception e) {
+
+                Log.d("EXCEPTION", e.getMessage());
+
+            }
         }
     }
 
@@ -122,7 +133,7 @@ public class TestActivity extends AppCompatActivity {
         File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), APP_TAG);
 
         // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
             Log.d(APP_TAG, "failed to create directory");
         }
 
