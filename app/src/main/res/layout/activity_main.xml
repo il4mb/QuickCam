@@ -19,6 +19,7 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
         <TextView
+            style="@style/Title"
             android:text="QuickCam"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
