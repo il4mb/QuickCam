@@ -21,7 +21,6 @@ import com.ilhamb.quickcam.databinding.ActivityTestBinding;
 public class TestActivity extends AppCompatActivity {
 
     private static final int CAMERA_REQUEST = 1888;
-    private ImageView imageView;
     private static final int MY_CAMERA_PERMISSION_CODE = 100;
 
     ActivityTestBinding binding;
@@ -89,7 +88,7 @@ public class TestActivity extends AppCompatActivity {
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
 
             Bitmap photo = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(photo);
+            binding.imageView.setImageBitmap(photo);
         }
     }
 }
