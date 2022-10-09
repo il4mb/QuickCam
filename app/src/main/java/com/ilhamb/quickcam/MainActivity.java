@@ -8,6 +8,7 @@ import com.ilhamb.quickcam.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
+    public final boolean TEST = false;
     ActivityMainBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,6 +17,10 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        if(TEST == true) {
+
+
+        }
 
     }
 }
