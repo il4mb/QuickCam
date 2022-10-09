@@ -17,17 +17,20 @@ import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 
 import com.ilhamb.quickcam.R;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
 
 public class ImageTools {
 
-    public int MinCrop = 50, MaxCrop = 50;
+    public int MinCrop = 0, MaxCrop = 15;
     public Uri imageUri;
     public String city = "Pekanbaru";
     private Context ctx;
@@ -45,7 +48,9 @@ public class ImageTools {
 
     public void stampDateGeo(View view) {
 
-        float scale = ctx.getResources().getDisplayMetrics().density;
+        Date currentTime = Calendar.getInstance().getTime();
+       // float scale = ctx.getResources().getDisplayMetrics().scaledDensity;
+        float textSize = 12f;
 
         Bitmap newBitmap = Bitmap.createBitmap(this.bmp.getWidth(), this.bmp.getHeight(), Bitmap.Config.ARGB_8888);
 
@@ -53,26 +58,38 @@ public class ImageTools {
         canvas.drawColor(Color.WHITE);
         canvas.drawBitmap(this.bmp, 0, 0, null);
 
+        double relation = Math.sqrt(canvas.getWidth() * canvas.getHeight()) / 250;
+
         Paint paint = new Paint();
-        paint.setColor(Color.GRAY);
+        paint.setColor(Color.WHITE);
         paint.setTypeface(Typeface.DEFAULT);
-        paint.setTextSize(7.5f * scale);
+        paint.setTextSize((float) (textSize * relation));
         float textWidth = paint.measureText(city);
 
+        Log.d("DATE", currentTime.toLocaleString());
 
+        String localDate = currentTime.toLocaleString();
         Bitmap icon = drawableToBitmap(ctx.getDrawable(R.drawable.ic_baseline_location_on_24));
-        icon = changeColor(icon, Color.BLACK, Color.GRAY);
-        icon = resizeBitmap(icon, (int) (15 * scale), (int) (15 * scale));
+        icon = changeColor(icon, Color.BLACK, Color.WHITE);
+        icon = resizeBitmap(icon, (int) (25 * relation), (int) (25 * relation));
 
-        int width = (int) ((icon.getWidth() + textWidth) * scale),
-                height = (int) ((icon.getHeight() + 14) * scale);
+        int area = bmp.getWidth() * bmp.getHeight();
+        Log.d("VOLUME", String.valueOf(area));
 
-        Bitmap loc = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        int extra = 25;
+        int bmplHeight = (int) (icon.getHeight() + textSize) + extra;
+        Bitmap loc = Bitmap.createBitmap(bmp.getWidth(), bmplHeight, Bitmap.Config.ARGB_8888);
+
         Canvas canvas1 = new Canvas(loc);
-        canvas1.drawBitmap(icon, 0, 0, null);
-        canvas1.drawText(city, 0, height, paint);
+        canvas1.drawColor(ctx.getResources().getColor(R.color.alpha_color));
 
-        canvas.drawBitmap(loc, 0, 0, paint);
+        canvas1.drawBitmap(icon, 0, 0, null);
+        canvas1.drawText(city, icon.getWidth(), icon.getHeight(), paint);
+        canvas1.drawText(localDate, extra/2, bmplHeight -extra/2 , paint);
+
+
+
+        canvas.drawBitmap(loc, 0, (canvas.getHeight() - bmplHeight), paint);
         this.bmp = newBitmap;
     }
 
