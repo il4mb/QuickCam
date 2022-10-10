@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 
@@ -16,9 +17,9 @@ import com.ilhamb.quickcam.adapter.ListViewAdapter;
 import com.ilhamb.quickcam.database.DataBase;
 import com.ilhamb.quickcam.databinding.ActivityMainBinding;
 import com.ilhamb.quickcam.utilities.jobManager;
-import com.ilhamb.quickcam.utilities.jobObject;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -86,8 +87,24 @@ public class MainActivity extends AppCompatActivity {
                 ListViewAdapter listAdapter = new ListViewAdapter(this, listFolder);
                 binding.listView.setAdapter(listAdapter);
 
-                Log.d("array LISt", new Gson().toJson(listFolder));
+                List<File> files = getChildFileList(data.getData());
+
+                Log.d("folder", new Gson().toJson(data.getData().toString()));
+                Log.d("array LISt", new Gson().toJson(files));
                 break;
         }
+    }
+
+    public List<File> getChildFileList(Uri uri){
+
+        String[] lastSegment = uri.getLastPathSegment().split(":");
+
+        String realPath = Environment.getExternalStorageDirectory().toString() + File.separator + lastSegment[1];
+        File file = new File(realPath);
+        File[] directories = file.listFiles();
+
+        Log.d("FILE FOL", new Gson().toJson(directories));
+        Log.d("REAL PATH", realPath);
+        return null;
     }
 }
