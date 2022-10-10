@@ -18,12 +18,39 @@
         android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
-        <TextView
-            style="@style/Title"
-            android:text="QuickCam"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+
+
     </androidx.appcompat.widget.Toolbar>
+
+    <FrameLayout
+        android:layout_marginTop="55dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ListView
+            android:id="@+id/list_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+        </ListView>
+        <Button
+            android:id="@+id/testmode"
+            android:layout_gravity="bottom"
+            android:backgroundTint="@color/teal_200"
+            android:background="@color/teal_200"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TEST MODE"/>
+    </FrameLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/add_job"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_margin="18dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_add_24"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

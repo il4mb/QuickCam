@@ -10,19 +10,30 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.gson.Gson;
 import com.ilhamb.quickcam.databinding.ActivityFakeCameraBinding;
 import com.ilhamb.quickcam.utilities.ImageTools;
+import com.ilhamb.quickcam.utilities.jobManager;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 public class FakeCameraActivity extends AppCompatActivity {
 
@@ -33,13 +44,20 @@ public class FakeCameraActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityFakeCameraBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        if (jobManager.listFolder.size() > 0) {
 
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        intent.setType("image/*");
-        this.startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+            ConfigFileHandle();
+
+        } else {
+
+            binding = ActivityFakeCameraBinding.inflate(getLayoutInflater());
+            setContentView(binding.getRoot());
+
+            Intent intent = new Intent();
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.setType("image/*");
+            this.startActivityForResult(intent, REQUEST_IMAGE_CAPTURE);
+        }
     }
 
     @Override
@@ -58,7 +76,7 @@ public class FakeCameraActivity extends AppCompatActivity {
                         ImageTools imageTools = new ImageTools(getApplicationContext(), data.getData());
 
                         imageTools.CropPresisi();
-                        imageTools.stampDateGeo(binding.frameStamp.getRoot());
+                        imageTools.stampDateGeo();
 
                         handleImage(imageTools.getBitmap());
 
@@ -116,4 +134,76 @@ public class FakeCameraActivity extends AppCompatActivity {
             FakeCameraActivity.this.finish();
 
     }
+
+    private void ConfigFileHandle(){
+        try {
+
+            int currentPrefixPos = jobManager.prepos;
+            int currentDirectoryPos = jobManager.folpos;
+
+            String preFix = jobManager.listPrefix.get(currentPrefixPos);
+            String directory = jobManager.listFolder.get(currentDirectoryPos);
+
+            Log.d("FOLDER", directory);
+            Log.d("PREFIX", preFix);
+
+            List<File> childsFile = Arrays.asList(new File(directory).listFiles());
+            Log.d("LIST FILE", new Gson().toJson(childsFile));
+
+            List<File> containsFile = new ArrayList<>();
+
+            String name = null;
+            for (File file : childsFile) {
+                if (file.getName().contains(preFix)) {
+                    containsFile.add(file);
+                }
+            }
+            File file = containsFile.size() > 0 ? getRandSingleFile(containsFile) : null;
+            if (file != null) {
+                try {
+
+                    Uri fileUri = Uri.fromFile(file);
+
+                    Log.d("OUTPUT", fileUri.toString());
+
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(),
+                            "Sayang sekali : " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                    this.finish();
+                }
+
+            } else {
+                this.finish();
+                Toast.makeText(getApplicationContext(),
+                        "File yang cocok dengan prefix tidak di temukan !",
+                        Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (Exception e) {
+
+            Log.d("ERROR MESSAGE", e.getMessage());
+        }
+    }
+
+    public File getRandSingleFile(List<File> files){
+
+        final int max = files.size();
+        final int random = new Random().nextInt((max - 0) + 1) + 0;
+        return files.get(random);
+
+    }
+
+    public List<File> getChildFileList(String dirUri){
+
+        Uri uri = Uri.parse(dirUri);
+        List<String> splited = Arrays.asList(uri.getLastPathSegment().split(":"));
+        String realPath = Environment.getExternalStorageDirectory().toString() + File.separator + splited.get(1);
+        File file = new File(realPath);
+        File[] directories = file.listFiles();
+
+        return Arrays.asList(directories);
+    }
+
+
 }

@@ -46,10 +46,10 @@ public class ImageTools {
 
     }
 
-    public void stampDateGeo(View view) {
+    public void stampDateGeo() {
 
         Date currentTime = Calendar.getInstance().getTime();
-       // float scale = ctx.getResources().getDisplayMetrics().scaledDensity;
+        String localDate = currentTime.toLocaleString();
         float textSize = 12f;
 
         Bitmap newBitmap = Bitmap.createBitmap(this.bmp.getWidth(), this.bmp.getHeight(), Bitmap.Config.ARGB_8888);
@@ -64,32 +64,23 @@ public class ImageTools {
         paint.setColor(Color.WHITE);
         paint.setTypeface(Typeface.DEFAULT);
         paint.setTextSize((float) (textSize * relation));
-        float textWidth = paint.measureText(city);
 
-        Log.d("DATE", currentTime.toLocaleString());
-
-        String localDate = currentTime.toLocaleString();
         Bitmap icon = drawableToBitmap(ctx.getDrawable(R.drawable.ic_baseline_location_on_24));
         icon = changeColor(icon, Color.BLACK, Color.WHITE);
         icon = resizeBitmap(icon, (int) (25 * relation), (int) (25 * relation));
 
-        int area = bmp.getWidth() * bmp.getHeight();
-        Log.d("VOLUME", String.valueOf(area));
-
         int extra = 25;
-        int bmplHeight = (int) (icon.getHeight() + textSize) + extra;
-        Bitmap loc = Bitmap.createBitmap(bmp.getWidth(), bmplHeight, Bitmap.Config.ARGB_8888);
+        int layerH = (int) (icon.getHeight() + textSize) + extra;
+        Bitmap loc = Bitmap.createBitmap(bmp.getWidth(), layerH, Bitmap.Config.ARGB_8888);
 
         Canvas canvas1 = new Canvas(loc);
         canvas1.drawColor(ctx.getResources().getColor(R.color.alpha_color));
 
         canvas1.drawBitmap(icon, 0, 0, null);
         canvas1.drawText(city, icon.getWidth(), icon.getHeight(), paint);
-        canvas1.drawText(localDate, extra/2, bmplHeight -extra/2 , paint);
+        canvas1.drawText(localDate, extra/2, layerH -extra/2 , paint);
 
-
-
-        canvas.drawBitmap(loc, 0, (canvas.getHeight() - bmplHeight), paint);
+        canvas.drawBitmap(loc, 0, (canvas.getHeight() - layerH), paint);
         this.bmp = newBitmap;
     }
 
