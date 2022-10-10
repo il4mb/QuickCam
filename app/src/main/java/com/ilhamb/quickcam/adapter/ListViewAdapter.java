@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ilhamb.quickcam.R;
+import com.ilhamb.quickcam.database.Job;
 import com.ilhamb.quickcam.utilities.jobManager;
 import com.ilhamb.quickcam.utilities.jobObject;
 
@@ -24,9 +25,9 @@ import java.util.List;
 
 public class ListViewAdapter implements ListAdapter {
 
-    List<String> arrayList;
+    List<Job> arrayList;
     Context context;
-    public ListViewAdapter(Context context, List<String> arrayList) {
+    public ListViewAdapter(Context context, List<Job> arrayList) {
         this.arrayList=arrayList;
         this.context=context;
     }
@@ -69,7 +70,7 @@ public class ListViewAdapter implements ListAdapter {
             convertView=layoutInflater.inflate(R.layout.custom_listview, null);
 
             TextView title = convertView.findViewById(R.id.folder_name);
-            title.setText(arrayList.get(position));
+            title.setText(arrayList.get(position).value);
 
             if(jobManager.folpos == position) {
 

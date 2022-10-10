@@ -8,5 +8,7 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="lame">#33FFBD</color>
+    <color name="tomato">#FF5733</color>
     <color name="alpha_color">#4a4a4a4f</color>
 </resources>

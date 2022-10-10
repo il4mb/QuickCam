@@ -1,17 +1,13 @@
 package com.ilhamb.quickcam;
 
-import static android.content.ContentValues.TAG;
-import static com.ilhamb.quickcam.utilities.jobManager.listFolder;
+import static com.ilhamb.quickcam.utilities.jobManager.jobList;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,12 +15,14 @@ import android.widget.AdapterView;
 import com.google.gson.Gson;
 import com.ilhamb.quickcam.adapter.ListViewAdapter;
 import com.ilhamb.quickcam.database.DataBase;
+import com.ilhamb.quickcam.database.Job;
+import com.ilhamb.quickcam.database.Prefix;
 import com.ilhamb.quickcam.databinding.ActivityMainBinding;
 import com.ilhamb.quickcam.utilities.RealPathUtil;
+import com.ilhamb.quickcam.utilities.TODO;
 import com.ilhamb.quickcam.utilities.jobManager;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -86,34 +84,24 @@ public class MainActivity extends AppCompatActivity {
 
                 Uri dataUri = data.getData();
                 String realPath = RealPathUtil.getRealPathFromURI( dataUri );
-                Log.d("REAL PATH", realPath);
 
-                listFolder.add(data.getData().toString());
+                if(realPath != null) {
 
-                ListViewAdapter listAdapter = new ListViewAdapter(this, listFolder);
-                binding.listView.setAdapter(listAdapter);
+                    Job.addJob(_DB.jobDao(), dataUri, new TODO() {
+                        @Override
+                        public void onSuccess() {
 
-                List<File> files = getChildFileList(data.getData());
-
-                Log.d("folder", new Gson().toJson(data.getData().toString()));
-                Log.d("array LISt", new Gson().toJson(files));
+                            updateListView();
+                        }
+                    });
+                }
                 break;
         }
     }
 
-    public List<File> getChildFileList(Uri uri){
-
-        File file = new File(RealPathUtil.getRealPathFromURI(uri));
-        File[] directories = file.listFiles();
-
-        Log.d("FILE FOL", new Gson().toJson(directories));
-
-        return null;
-    }
-
     private void updateListView() {
-        if(listFolder.size() > 0) {
-            ListViewAdapter listAdapter = new ListViewAdapter(this, listFolder);
+        if(jobList.size() > 0) {
+            ListViewAdapter listAdapter = new ListViewAdapter(this, jobList);
             binding.listView.setAdapter(listAdapter);
         }
     }
@@ -125,9 +113,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void testMode() {
-        jobManager.listPrefix.add("images");
+
+        Prefix prefix = new Prefix();
+        prefix.value = "images";
+
+        jobManager.prefixList.add(prefix);
 
         Intent intent = new Intent(MainActivity.this, TestActivity.class);
         startActivity(intent);
     }
+
 }
