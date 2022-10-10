@@ -14,6 +14,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 
 import com.google.gson.Gson;
 import com.ilhamb.quickcam.adapter.ListViewAdapter;
@@ -44,9 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (TEST == true) {
 
-            Intent intent = new Intent(MainActivity.this, TestActivity.class);
-            startActivity(intent);
-
+            testMode();
             this.finish();
         }
 
@@ -54,19 +53,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                jobManager.listPrefix.add("images");
-
-                Intent intent = new Intent(MainActivity.this, TestActivity.class);
-                startActivity(intent);
-
+                testMode();
             }
         });
-
-        if(listFolder.size() > 0) {
-            ListViewAdapter listAdapter = new ListViewAdapter(this, listFolder);
-            binding.listView.setAdapter(listAdapter);
-        }
-
         binding.addJob.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -76,6 +65,14 @@ public class MainActivity extends AppCompatActivity {
                     i.addCategory(Intent.CATEGORY_DEFAULT);
                     startActivityForResult(Intent.createChooser(i, "Choose directory"), 9999);
                 }
+            }
+        });
+        binding.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                jobManager.setJobPos(i);
+                updateListView();
             }
         });
     }
@@ -114,5 +111,23 @@ public class MainActivity extends AppCompatActivity {
         return null;
     }
 
+    private void updateListView() {
+        if(listFolder.size() > 0) {
+            ListViewAdapter listAdapter = new ListViewAdapter(this, listFolder);
+            binding.listView.setAdapter(listAdapter);
+        }
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        updateListView();
+    }
+
+    private void testMode() {
+        jobManager.listPrefix.add("images");
+
+        Intent intent = new Intent(MainActivity.this, TestActivity.class);
+        startActivity(intent);
+    }
 }

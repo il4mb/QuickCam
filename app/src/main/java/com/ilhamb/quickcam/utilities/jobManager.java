@@ -1,5 +1,8 @@
 package com.ilhamb.quickcam.utilities;
 
+import android.util.Log;
+import android.view.View;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +12,7 @@ public class jobManager {
     public static int folpos = 0, prepos = 0;
 
     public static void forwardJob() {
-        if (listFolder.size() -1 < folpos) {
+        if (listFolder.size() -1 > folpos) {
             folpos += 1;
         } else folpos = 0;
     }
@@ -27,6 +30,8 @@ public class jobManager {
             prepos = 0;
             forwardJob();
         }
+
+        Log.d("JOB", String.valueOf(prepos));
     }
     public static void backwardPrefix() {
         if(prepos > 0) {
@@ -35,5 +40,9 @@ public class jobManager {
             prepos = listFolder.size()-1;
             backwardJob();
         }
+    }
+
+    public static void setJobPos(int position) {
+        folpos = position;
     }
 }

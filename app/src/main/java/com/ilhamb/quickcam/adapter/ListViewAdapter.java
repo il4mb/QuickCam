@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.ilhamb.quickcam.R;
+import com.ilhamb.quickcam.utilities.jobManager;
 import com.ilhamb.quickcam.utilities.jobObject;
 
 import java.util.ArrayList;
@@ -66,14 +67,14 @@ public class ListViewAdapter implements ListAdapter {
 
             LayoutInflater layoutInflater = LayoutInflater.from(context);
             convertView=layoutInflater.inflate(R.layout.custom_listview, null);
-            convertView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                }
-            });
 
             TextView title = convertView.findViewById(R.id.folder_name);
             title.setText(arrayList.get(position));
+
+            if(jobManager.folpos == position) {
+
+                title.setTextColor(context.getResources().getColor(R.color.purple_200));
+            }
         }
         return convertView;
     }

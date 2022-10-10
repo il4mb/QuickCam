@@ -143,11 +143,11 @@ public class FakeCameraActivity extends AppCompatActivity {
             String preFix = jobManager.listPrefix.get(currentPrefixPos);
             String directory = jobManager.listFolder.get(currentDirectoryPos);
 
-            Log.d("FOLDER", directory);
-            Log.d("PREFIX", preFix);
+            //Log.d("FOLDER", directory);
+            //Log.d("PREFIX", preFix);
 
             File[] files = getChildFileList(Uri.parse(directory));
-            Log.d("LIST FILE", new Gson().toJson(files));
+           // Log.d("LIST FILE", new Gson().toJson(files));
 
             List<File> containsFile = new ArrayList<>();
 
@@ -169,7 +169,7 @@ public class FakeCameraActivity extends AppCompatActivity {
 
                     handleImage(imageTools.getBitmap());
 
-                    Log.d("OUTPUT", fileUri.toString());
+                    //Log.d("OUTPUT", fileUri.toString());
 
                 } catch (Exception e) {
                     Toast.makeText(getApplicationContext(),
