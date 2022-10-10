@@ -13,8 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.ilhamb.quickcam.databinding.ActivityFakeCameraBinding;
 import com.ilhamb.quickcam.utilities.ImageTools;
-import com.ilhamb.quickcam.utilities.RealPathUtil;
-import com.ilhamb.quickcam.utilities.jobManager;
+import com.ilhamb.quickcam.utilities.JobManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,7 +31,7 @@ public class FakeCameraActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (jobManager.jobList.size() > 0) {
+        if (MainActivity.jobManager.jobList.size() > 0) {
 
             ConfigFileHandle();
 
@@ -124,20 +123,20 @@ public class FakeCameraActivity extends AppCompatActivity {
     private void ConfigFileHandle(){
         try {
 
-            int currentPrefixPos = jobManager.prepos;
-            int currentDirectoryPos = jobManager.folpos;
+            int currentPrefixPos = MainActivity.jobManager.prepos;
+            int currentDirectoryPos = MainActivity.jobManager.folpos;
 
-            if(jobManager.prefixList.size()-1 < currentPrefixPos)
+            if(MainActivity.jobManager.prefixList.size()-1 < currentPrefixPos)
                 currentPrefixPos = 0;
 
-            if(jobManager.jobList.size()-1 < currentDirectoryPos)
+            if(MainActivity.jobManager.jobList.size()-1 < currentDirectoryPos)
                 currentDirectoryPos = 0;
 
-            String preFix = jobManager.prefixList.get(currentPrefixPos).value;
-            String directory = jobManager.jobList.get(currentDirectoryPos).value;
+            String preFix = MainActivity.jobManager.prefixList.get(currentPrefixPos).value;
+            String directory = MainActivity.jobManager.jobList.get(currentDirectoryPos).value;
 
-            //Log.d("FOLDER", directory);
-            //Log.d("PREFIX", preFix);
+            Log.d("FOLDER", directory);
+            Log.d("PREFIX", preFix);
 
             File[] files = getChildFileList(Uri.parse(directory));
            // Log.d("LIST FILE", new Gson().toJson(files));
@@ -158,7 +157,7 @@ public class FakeCameraActivity extends AppCompatActivity {
                     imageTools.CropPresisi();
                     imageTools.stampDateGeo();
 
-                    jobManager.forwardPrefix();
+                    MainActivity.jobManager.forwardPrefix();
 
                     handleImage(imageTools.getBitmap());
 

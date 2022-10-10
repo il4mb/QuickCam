@@ -5,14 +5,13 @@ import android.database.DataSetObserver;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.ilhamb.quickcam.MainActivity;
 import com.ilhamb.quickcam.R;
 import com.ilhamb.quickcam.database.Job;
-import com.ilhamb.quickcam.utilities.jobManager;
+import com.ilhamb.quickcam.utilities.JobManager;
 
 import java.util.List;
 
@@ -62,16 +61,16 @@ public class ListViewAdapter implements ListAdapter {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
             convertView=layoutInflater.inflate(R.layout.custom_listview, null);
 
-            Button delete = convertView.findViewById(R.id.delete);
-            TextView _job = convertView.findViewById(R.id._job),
+            TextView delete = convertView.findViewById(R.id.delete),
+                    _job = convertView.findViewById(R.id._job),
                     _prefix = convertView.findViewById(R.id._prefix);
             _job.setText(arrayList.get(position).value);
 
             _prefix.setVisibility(View.GONE);
 
-            if(jobManager.folpos == position) {
+            if(MainActivity.jobManager.folpos == position) {
 
-                String prefix = jobManager.prefixList.size() > 0 ? jobManager.prefixList.get(jobManager.prepos).value : null;
+                String prefix = MainActivity.jobManager.prefixList.size() > 0 ? MainActivity.jobManager.prefixList.get(MainActivity.jobManager.prepos).value : null;
                 prefix = prefix != null ? prefix : "null";
 
                 _job.setTextColor(context.getResources().getColor(R.color.purple_200));
@@ -84,6 +83,14 @@ public class ListViewAdapter implements ListAdapter {
                 public void onClick(View view) {
 
                     MainActivity.deleteJob(arrayList.get(position));
+                }
+            });
+
+            _prefix.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    MainActivity.jobManager.forwardPrefix();
                 }
             });
         }

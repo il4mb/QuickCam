@@ -1,15 +1,15 @@
 package com.ilhamb.quickcam.database;
 
 import android.net.Uri;
-import android.util.Log;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.ilhamb.quickcam.MainActivity;
 import com.ilhamb.quickcam.utilities.RealPathUtil;
 import com.ilhamb.quickcam.utilities.TODO;
-import com.ilhamb.quickcam.utilities.jobManager;
+import com.ilhamb.quickcam.utilities.JobManager;
 
 @Entity(tableName= "job")
 public class Job {
@@ -25,9 +25,7 @@ public class Job {
         Job job = new Job();
         job.value = RealPathUtil.getRealPathFromURI(uri);
         jobDao.insertAll(job);
-        jobManager.setJobList(jobDao.getAll());
-
-        Log.d("POSITION JOB", String.valueOf(jobManager.folpos));
+        MainActivity.jobManager.setJobList(jobDao.getAll());
 
         todo.onSuccess();
     }
@@ -35,9 +33,7 @@ public class Job {
     public static void deleteJob(JobDao jobDao, Job job, TODO todo) {
 
         jobDao.delete(job);
-        jobManager.setJobList(jobDao.getAll());
-
-        Log.d("POSITION JOB", String.valueOf(jobManager.folpos));
+        MainActivity.jobManager.setJobList(jobDao.getAll());
 
         todo.onSuccess();
     }

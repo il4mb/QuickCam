@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
+import com.google.gson.Gson;
 import com.ilhamb.quickcam.adapter.ListViewAdapter;
 import com.ilhamb.quickcam.database.DataBase;
 import com.ilhamb.quickcam.database.Job;
@@ -19,7 +20,10 @@ import com.ilhamb.quickcam.databinding.ActivityMainBinding;
 import com.ilhamb.quickcam.utilities.RealPathUtil;
 import com.ilhamb.quickcam.utilities.TODO;
 import com.ilhamb.quickcam.utilities.DataViewModel;
-import com.ilhamb.quickcam.utilities.jobManager;
+import com.ilhamb.quickcam.utilities.JobManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     public final boolean TEST = false;
     ActivityMainBinding binding;
     public static DataViewModel viewModel;
+    public static JobManager jobManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,8 +41,27 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        viewModel = new ViewModelProvider(this).get(DataViewModel.class);
         _DB = DataBase.getDbInstance(getApplicationContext());
+
+        List<Job> jobList = _DB.jobDao().getAll();
+        List<Prefix> prefixList = _DB.prefixDao().getAll();
+        jobManager = new JobManager(jobList, prefixList);
+
+        viewModel = new ViewModelProvider(this).get(DataViewModel.class);
+        viewModel.setLiveDataJob(jobList);
+        viewModel.setLiveDataPrefix(prefixList);
+
+        viewModel.getJobData().observe(this, val -> {
+
+            jobManager.setJobList(val);
+            updateListView();
+        });
+        viewModel.getPrefixData().observe(this, val -> {
+
+            jobManager.setPrefixList(val);
+            updateListView();
+        });
+
 
         if (TEST == true) {
 
@@ -69,25 +93,31 @@ public class MainActivity extends AppCompatActivity {
 
                 jobManager.setJobPos(i);
                 updateListView();
-                Log.d("JOB POSITION", String.valueOf(i));
             }
         });
 
+        Prefix prefix = new Prefix();
+        prefix.value = "images";
+       // jobManager.prefixList.add(prefix);
 
-        jobManager.jobList = _DB.jobDao().getAll();
-        jobManager.prefixList = _DB.prefixDao().getAll();
+        Prefix depan = new Prefix();
+        depan.value = "Depan ";
+        Prefix ruangan = new Prefix();
+        ruangan.value = "Ruangan ";
+        Prefix booth = new Prefix();
+        booth.value = "Booth ";
+        Prefix belakang = new Prefix();
+        belakang.value = "Belakang ";
 
+        jobManager.prefixList.add(depan);
+        jobManager.prefixList.add(ruangan);
+        jobManager.prefixList.add(booth);
+        jobManager.prefixList.add(belakang);
+        jobManager.prefixList.add(depan);
+        jobManager.prefixList.add(ruangan);
+        jobManager.prefixList.add(booth);
+        jobManager.prefixList.add(belakang);
 
-        viewModel.getJobData().observe(this, val -> {
-
-            jobManager.setJobList(val);
-            updateListView();
-        });
-        viewModel.getPrefixData().observe(this, val -> {
-
-            jobManager.setPrefixList(val);
-            updateListView();
-        });
     }
 
     @Override
@@ -134,11 +164,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void testMode() {
-
-        Prefix prefix = new Prefix();
-        prefix.value = "images";
-
-        jobManager.prefixList.add(prefix);
 
         Intent intent = new Intent(MainActivity.this, TestActivity.class);
         startActivity(intent);
