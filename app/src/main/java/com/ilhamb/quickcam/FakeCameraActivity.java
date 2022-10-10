@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.gson.Gson;
 import com.ilhamb.quickcam.databinding.ActivityFakeCameraBinding;
 import com.ilhamb.quickcam.utilities.ImageTools;
+import com.ilhamb.quickcam.utilities.RealPathUtil;
 import com.ilhamb.quickcam.utilities.jobManager;
 
 import java.io.BufferedReader;
@@ -79,8 +80,6 @@ public class FakeCameraActivity extends AppCompatActivity {
                         imageTools.stampDateGeo();
 
                         handleImage(imageTools.getBitmap());
-
-                        Log.d("GALLERY RESULT", new Gson().toJson(img));
 
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -147,13 +146,12 @@ public class FakeCameraActivity extends AppCompatActivity {
             Log.d("FOLDER", directory);
             Log.d("PREFIX", preFix);
 
-            List<File> childsFile = Arrays.asList(new File(directory).listFiles());
-            Log.d("LIST FILE", new Gson().toJson(childsFile));
+            File[] files = getChildFileList(Uri.parse(directory));
+            Log.d("LIST FILE", new Gson().toJson(files));
 
             List<File> containsFile = new ArrayList<>();
 
-            String name = null;
-            for (File file : childsFile) {
+            for (File file : files) {
                 if (file.getName().contains(preFix)) {
                     containsFile.add(file);
                 }
@@ -163,6 +161,13 @@ public class FakeCameraActivity extends AppCompatActivity {
                 try {
 
                     Uri fileUri = Uri.fromFile(file);
+                    ImageTools imageTools = new ImageTools(getApplicationContext(), fileUri);
+                    imageTools.CropPresisi();
+                    imageTools.stampDateGeo();
+
+                    jobManager.forwardPrefix();
+
+                    handleImage(imageTools.getBitmap());
 
                     Log.d("OUTPUT", fileUri.toString());
 
@@ -189,20 +194,15 @@ public class FakeCameraActivity extends AppCompatActivity {
     public File getRandSingleFile(List<File> files){
 
         final int max = files.size();
-        final int random = new Random().nextInt((max - 0) + 1) + 0;
+        final int random = new Random().nextInt(max - 1);
         return files.get(random);
 
     }
 
-    public List<File> getChildFileList(String dirUri){
+    public File[] getChildFileList(Uri uri){
 
-        Uri uri = Uri.parse(dirUri);
-        List<String> splited = Arrays.asList(uri.getLastPathSegment().split(":"));
-        String realPath = Environment.getExternalStorageDirectory().toString() + File.separator + splited.get(1);
-        File file = new File(realPath);
-        File[] directories = file.listFiles();
-
-        return Arrays.asList(directories);
+        File file = new File(RealPathUtil.getRealPathFromURI(uri));
+        return file.listFiles();
     }
 
 

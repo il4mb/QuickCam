@@ -1,14 +1,17 @@
 package com.ilhamb.quickcam;
 
+import static android.content.ContentValues.TAG;
 import static com.ilhamb.quickcam.utilities.jobManager.listFolder;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 
@@ -16,6 +19,7 @@ import com.google.gson.Gson;
 import com.ilhamb.quickcam.adapter.ListViewAdapter;
 import com.ilhamb.quickcam.database.DataBase;
 import com.ilhamb.quickcam.databinding.ActivityMainBinding;
+import com.ilhamb.quickcam.utilities.RealPathUtil;
 import com.ilhamb.quickcam.utilities.jobManager;
 
 import java.io.File;
@@ -82,6 +86,11 @@ public class MainActivity extends AppCompatActivity {
 
         switch(requestCode) {
             case 9999:
+
+                Uri dataUri = data.getData();
+                String realPath = RealPathUtil.getRealPathFromURI( dataUri );
+                Log.d("REAL PATH", realPath);
+
                 listFolder.add(data.getData().toString());
 
                 ListViewAdapter listAdapter = new ListViewAdapter(this, listFolder);
@@ -97,14 +106,13 @@ public class MainActivity extends AppCompatActivity {
 
     public List<File> getChildFileList(Uri uri){
 
-        String[] lastSegment = uri.getLastPathSegment().split(":");
-
-        String realPath = Environment.getExternalStorageDirectory().toString() + File.separator + lastSegment[1];
-        File file = new File(realPath);
+        File file = new File(RealPathUtil.getRealPathFromURI(uri));
         File[] directories = file.listFiles();
 
         Log.d("FILE FOL", new Gson().toJson(directories));
-        Log.d("REAL PATH", realPath);
+
         return null;
     }
+
+
 }
