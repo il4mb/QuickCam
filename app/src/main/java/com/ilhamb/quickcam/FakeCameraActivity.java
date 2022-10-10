@@ -127,6 +127,12 @@ public class FakeCameraActivity extends AppCompatActivity {
             int currentPrefixPos = jobManager.prepos;
             int currentDirectoryPos = jobManager.folpos;
 
+            if(jobManager.prefixList.size()-1 < currentPrefixPos)
+                currentPrefixPos = 0;
+
+            if(jobManager.jobList.size()-1 < currentDirectoryPos)
+                currentDirectoryPos = 0;
+
             String preFix = jobManager.prefixList.get(currentPrefixPos).value;
             String directory = jobManager.jobList.get(currentDirectoryPos).value;
 

@@ -1,9 +1,8 @@
 package com.ilhamb.quickcam;
 
-import static com.ilhamb.quickcam.utilities.jobManager.jobList;
-
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -12,7 +11,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
-import com.google.gson.Gson;
 import com.ilhamb.quickcam.adapter.ListViewAdapter;
 import com.ilhamb.quickcam.database.DataBase;
 import com.ilhamb.quickcam.database.Job;
@@ -20,10 +18,8 @@ import com.ilhamb.quickcam.database.Prefix;
 import com.ilhamb.quickcam.databinding.ActivityMainBinding;
 import com.ilhamb.quickcam.utilities.RealPathUtil;
 import com.ilhamb.quickcam.utilities.TODO;
+import com.ilhamb.quickcam.utilities.DataViewModel;
 import com.ilhamb.quickcam.utilities.jobManager;
-
-import java.io.File;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
 
     public final boolean TEST = false;
     ActivityMainBinding binding;
+    public static DataViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +36,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        viewModel = new ViewModelProvider(this).get(DataViewModel.class);
         _DB = DataBase.getDbInstance(getApplicationContext());
 
         if (TEST == true) {
@@ -71,7 +69,24 @@ public class MainActivity extends AppCompatActivity {
 
                 jobManager.setJobPos(i);
                 updateListView();
+                Log.d("JOB POSITION", String.valueOf(i));
             }
+        });
+
+
+        jobManager.jobList = _DB.jobDao().getAll();
+        jobManager.prefixList = _DB.prefixDao().getAll();
+
+
+        viewModel.getJobData().observe(this, val -> {
+
+            jobManager.setJobList(val);
+            updateListView();
+        });
+        viewModel.getPrefixData().observe(this, val -> {
+
+            jobManager.setPrefixList(val);
+            updateListView();
         });
     }
 
@@ -100,9 +115,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateListView() {
-        if(jobList.size() > 0) {
-            ListViewAdapter listAdapter = new ListViewAdapter(this, jobList);
+
+        binding.listView.setVisibility(View.GONE);
+
+        if(jobManager.jobList.size() > 0) {
+
+            ListViewAdapter listAdapter = new ListViewAdapter(this, jobManager.jobList);
             binding.listView.setAdapter(listAdapter);
+            binding.listView.setVisibility(View.VISIBLE);
+
         }
     }
 
@@ -121,6 +142,17 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(MainActivity.this, TestActivity.class);
         startActivity(intent);
+    }
+
+    public static void deleteJob(Job job) {
+
+        Job.deleteJob(_DB.jobDao(), job, new TODO() {
+            @Override
+            public void onSuccess() {
+
+                viewModel.setLiveDataJob(jobManager.jobList);
+            }
+        });
     }
 
 }

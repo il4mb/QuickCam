@@ -48,4 +48,13 @@ public class jobManager {
     public static void setJobPos(int position) {
         folpos = position;
     }
+
+    public static void setJobList(List<Job> _jobList) {
+
+        jobList = _jobList;
+    }
+    public static void setPrefixList(List<Prefix> _prefixList) {
+
+        prefixList = _prefixList;
+    }
 }

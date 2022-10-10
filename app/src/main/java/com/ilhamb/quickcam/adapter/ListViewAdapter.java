@@ -1,26 +1,19 @@
 package com.ilhamb.quickcam.adapter;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
+import com.ilhamb.quickcam.MainActivity;
 import com.ilhamb.quickcam.R;
 import com.ilhamb.quickcam.database.Job;
 import com.ilhamb.quickcam.utilities.jobManager;
-import com.ilhamb.quickcam.utilities.jobObject;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ListViewAdapter implements ListAdapter {
@@ -69,14 +62,32 @@ public class ListViewAdapter implements ListAdapter {
             LayoutInflater layoutInflater = LayoutInflater.from(context);
             convertView=layoutInflater.inflate(R.layout.custom_listview, null);
 
-            TextView title = convertView.findViewById(R.id.folder_name);
-            title.setText(arrayList.get(position).value);
+            Button delete = convertView.findViewById(R.id.delete);
+            TextView _job = convertView.findViewById(R.id._job),
+                    _prefix = convertView.findViewById(R.id._prefix);
+            _job.setText(arrayList.get(position).value);
+
+            _prefix.setVisibility(View.GONE);
 
             if(jobManager.folpos == position) {
 
-                title.setTextColor(context.getResources().getColor(R.color.purple_200));
+                String prefix = jobManager.prefixList.size() > 0 ? jobManager.prefixList.get(jobManager.prepos).value : null;
+                prefix = prefix != null ? prefix : "null";
+
+                _job.setTextColor(context.getResources().getColor(R.color.purple_200));
+                _prefix.setVisibility(View.VISIBLE);
+                _prefix.setText( prefix );
             }
+
+            delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    MainActivity.deleteJob(arrayList.get(position));
+                }
+            });
         }
+
         return convertView;
     }
     @Override

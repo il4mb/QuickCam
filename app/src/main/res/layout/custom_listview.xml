@@ -12,24 +12,29 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <TextView
+                android:id="@+id/_job"
                 android:layout_weight="2"
-                android:id="@+id/folder_name"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="roo/haha/"/>
+
             <TextView
-                android:textColor=""
+                android:id="@+id/_prefix"
+                android:textColor="@color/orange"
                 android:text="Depan"
+                android:textStyle="bold"
                 android:gravity="center"
                 android:layout_weight="0.5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+
             <Button
-                android:backgroundTint="@color/tomato"
+                android:id="@+id/delete"
+                android:backgroundTint="@color/red"
                 android:text="DEL"
-                android:layout_weight="0.8"
-                android:layout_width="0dp"
+                android:layout_width="80dp"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
 
