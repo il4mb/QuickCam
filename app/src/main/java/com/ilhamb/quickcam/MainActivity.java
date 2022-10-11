@@ -1,15 +1,21 @@
 package com.ilhamb.quickcam;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.ilhamb.quickcam.adapter.ListViewAdapter;
@@ -26,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+
+    public static final int CAMERA_PERMISSION_CODE = 6652;
+    public static final int STORAGE_PERMISSION_CODE = 5562;
 
     public static DataBase _DB;
 
@@ -80,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP){
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                     Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
                     i.addCategory(Intent.CATEGORY_DEFAULT);
                     startActivityForResult(Intent.createChooser(i, "Choose directory"), 9999);
@@ -98,16 +107,16 @@ public class MainActivity extends AppCompatActivity {
 
         Prefix prefix = new Prefix();
         prefix.value = "images";
-        jobManager.prefixList.add(prefix);
+        // jobManager.prefixList.add(prefix);
 
         Prefix depan = new Prefix();
-        depan.value = "Depan ";
+        depan.value = "Depan";
         Prefix ruangan = new Prefix();
-        ruangan.value = "Ruangan ";
+        ruangan.value = "Ruangan";
         Prefix booth = new Prefix();
-        booth.value = "Booth ";
+        booth.value = "Booth";
         Prefix belakang = new Prefix();
-        belakang.value = "Belakang ";
+        belakang.value = "Belakang";
 
         jobManager.prefixList.add(depan);
         jobManager.prefixList.add(ruangan);
@@ -117,6 +126,8 @@ public class MainActivity extends AppCompatActivity {
         jobManager.prefixList.add(ruangan);
         jobManager.prefixList.add(booth);
         jobManager.prefixList.add(belakang);
+
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
 
     }
 
@@ -124,31 +135,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch(requestCode) {
-            case 9999:
+        if (resultCode == RESULT_OK)
+            switch (requestCode) {
+                case 9999:
 
-                Uri dataUri = data.getData();
-                String realPath = RealPathUtil.getRealPathFromURI( dataUri );
+                    Uri dataUri = data.getData();
+                    String realPath = RealPathUtil.getRealPathFromURI(dataUri);
 
-                if(realPath != null) {
+                    if (realPath != null) {
 
-                    Job.addJob(_DB.jobDao(), dataUri, new TODO() {
-                        @Override
-                        public void onSuccess() {
+                        Job.addJob(_DB.jobDao(), dataUri, new TODO() {
+                            @Override
+                            public void onSuccess() {
 
-                            updateListView();
-                        }
-                    });
-                }
-                break;
-        }
+                                updateListView();
+                            }
+                        });
+                    }
+                    break;
+            }
     }
 
     private void updateListView() {
 
         binding.listView.setVisibility(View.GONE);
 
-        if(jobManager.jobList.size() > 0) {
+        if (jobManager.jobList.size() > 0) {
 
             ListViewAdapter listAdapter = new ListViewAdapter(this, jobManager.jobList);
             binding.listView.setAdapter(listAdapter);
@@ -178,6 +190,48 @@ public class MainActivity extends AppCompatActivity {
                 viewModel.setLiveDataJob(jobManager.jobList);
             }
         });
+    }
+
+    // Function to check and request permission
+    public void checkPermission(String permission, int requestCode)
+    {
+        // Checking if permission is not granted
+        if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
+        }
+    }
+
+
+
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+
+            // Checking whether user granted the permission or not.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                // Showing the toast message
+                Toast.makeText(MainActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else if (requestCode == STORAGE_PERMISSION_CODE) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(MainActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(MainActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
+
+                checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
+            }
+        }
     }
 
 }

@@ -3,6 +3,7 @@ package com.ilhamb.quickcam;
 import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import com.ilhamb.quickcam.utilities.JobManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,14 +38,23 @@ public class FakeCameraActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        binding = ActivityFakeCameraBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
         if (MainActivity.jobManager.jobList.size() > 0) {
 
-            ConfigFileHandle();
+            try {
+
+                ConfigFileHandle();
+
+            } catch (Exception e) {
+
+                Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                this.finish();
+
+            }
 
         } else {
-
-            binding = ActivityFakeCameraBinding.inflate(getLayoutInflater());
-            setContentView(binding.getRoot());
 
             Intent intent = new Intent();
             intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -61,20 +72,23 @@ public class FakeCameraActivity extends AppCompatActivity {
             switch (requestCode) {
 
                 case REQUEST_IMAGE_CAPTURE:
-                    Bitmap img = null;
 
-                    try {
+                        try {
 
-                        ImageTools imageTools = new ImageTools(getApplicationContext(), data.getData());
+                            InputStream is = getContentResolver().openInputStream(data.getData());
+                            Bitmap bitmap = BitmapFactory.decodeStream(is);
 
-                        imageTools.CropPresisi();
-                        imageTools.stampDateGeo();
+                            ImageTools imageTools = new ImageTools(getApplicationContext(), bitmap, data.getData());
+                            imageTools.CropPresisi();
+                            imageTools.stampDateGeo();
+                            handleImage(imageTools.getBitmap());
 
-                        handleImage(imageTools.getBitmap());
+                        } catch (Exception e) {
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+
+                            this.finish();
+                        }
 
                     break;
 
@@ -95,6 +109,7 @@ public class FakeCameraActivity extends AppCompatActivity {
     }
 
     private void handleImage(Bitmap img) throws IOException {
+
         // CLIP DATA FROM CALLER ACT
         ClipData clipData = getIntent().getClipData();
 
@@ -125,9 +140,7 @@ public class FakeCameraActivity extends AppCompatActivity {
 
     }
 
-    private void ConfigFileHandle() {
-
-        try {
+    private void ConfigFileHandle() throws Exception {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 
                 int cps = MainActivity.jobManager.prepos;
@@ -143,6 +156,7 @@ public class FakeCameraActivity extends AppCompatActivity {
                 String directory = null;
 
                 try {
+
                     preFix = MainActivity.jobManager.prefixList.get(cps).value;
                     directory = MainActivity.jobManager.jobList.get(cds).value;
 
@@ -173,20 +187,6 @@ public class FakeCameraActivity extends AppCompatActivity {
 
                 } else throw new Exception("File yang cocok dengan prefix tidak di temukan !");
             }
-        } catch (Exception e) {
-
-            Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-            this.finish();
-        }
-
-    }
-
-    public File getRandSingleFile(List<File> files) {
-
-        final int max = files.size();
-        final int random = new Random().nextInt(max - 1);
-        return files.get(random);
-
     }
 
     public File[] getChildFileList(Uri uri) {

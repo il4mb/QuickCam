@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 
 import com.ilhamb.quickcam.R;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
@@ -38,8 +39,16 @@ public class ImageTools {
     private Context ctx;
     private Bitmap bmp;
 
+    public ImageTools(Context context, Bitmap bitmap, Uri uri) throws Exception {
 
-    public ImageTools(Context context, Uri uri) throws IOException {
+        this.ctx = context;
+        this.imageUri = uri;
+        this.bmp = bitmap;
+
+        rotateImageIfRequired();
+    }
+
+    public ImageTools(Context context, Uri uri) throws Exception {
 
         this.ctx = context;
         this.imageUri = uri;
@@ -87,7 +96,7 @@ public class ImageTools {
     }
 
 
-    private Bitmap handleSamplingAndRotationBitmap() throws IOException {
+    private Bitmap handleSamplingAndRotationBitmap() throws Exception {
         int MAX_HEIGHT = 1024;
         int MAX_WIDTH = 1024;
 
@@ -178,74 +187,7 @@ public class ImageTools {
         this.bmp.recycle();
     }
 
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
 
-        int width = drawable.getIntrinsicWidth();
-        width = width > 0 ? width : 1;
-        int height = drawable.getIntrinsicHeight();
-        height = height > 0 ? height : 1;
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
-    }
-
-    private Bitmap changeColor(Bitmap src, int colorToReplace, int colorThatWillReplace) {
-        int width = src.getWidth();
-        int height = src.getHeight();
-        int[] pixels = new int[width * height];
-        // get pixel array from source
-        src.getPixels(pixels, 0, width, 0, 0, width, height);
-
-        Bitmap bmOut = Bitmap.createBitmap(width, height, src.getConfig());
-
-        int A, R, G, B;
-        int pixel;
-
-        // iteration through pixels
-        for (int y = 0; y < height; ++y) {
-            for (int x = 0; x < width; ++x) {
-                // get current index in 2D-matrix
-                int index = y * width + x;
-                pixel = pixels[index];
-                if (pixel == colorToReplace) {
-                    //change A-RGB individually
-                    A = Color.alpha(colorThatWillReplace);
-                    R = Color.red(colorThatWillReplace);
-                    G = Color.green(colorThatWillReplace);
-                    B = Color.blue(colorThatWillReplace);
-                    pixels[index] = Color.argb(A, R, G, B);
-                    /*or change the whole color
-                    pixels[index] = colorThatWillReplace;*/
-                }
-            }
-        }
-        bmOut.setPixels(pixels, 0, width, 0, 0, width, height);
-        return bmOut;
-    }
-
-    public Bitmap resizeBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;
-    }
 }
 
 class Stamp {

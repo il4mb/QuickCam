@@ -97,6 +97,7 @@ public class TestActivity extends AppCompatActivity {
                 Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
                 Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(cameraIntent, CAMERA_REQUEST);
+
             } else {
 
                 Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
