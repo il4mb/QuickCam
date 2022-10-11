@@ -2,6 +2,7 @@ package com.ilhamb.quickcam.adapter;
 
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,23 +11,23 @@ import android.widget.TextView;
 
 import androidx.fragment.app.FragmentManager;
 
+import com.google.gson.Gson;
 import com.ilhamb.quickcam.MainActivity;
 import com.ilhamb.quickcam.R;
 import com.ilhamb.quickcam.database.Job;
+import com.ilhamb.quickcam.database.Prefix;
 import com.ilhamb.quickcam.fragment.ListModalDialog;
 
 import java.util.List;
 
-public class ListViewAdapter implements ListAdapter {
+public class ModalListViewAdapter implements ListAdapter {
 
-    List<Job> arrayList;
+    List<Prefix> arrayList;
     Context context;
-    FragmentManager fragmentManager;
-    public ListViewAdapter(Context context, FragmentManager fm, List<Job> arrayList) {
+    public ModalListViewAdapter(Context context, List<Prefix> arrayList) {
 
         this.arrayList = arrayList;
         this.context = context;
-        this.fragmentManager = fm;
     }
     @Override
     public boolean areAllItemsEnabled() {
@@ -61,46 +62,18 @@ public class ListViewAdapter implements ListAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        if(convertView==null) {
+        if(convertView == null) {
 
             LayoutInflater layoutInflater = LayoutInflater.from(context);
-            convertView=layoutInflater.inflate(R.layout.custom_listview, null);
+            convertView = layoutInflater.inflate(R.layout.list_view_item, null);
 
-            TextView delete = convertView.findViewById(R.id.delete),
-                    _job = convertView.findViewById(R.id._job),
-                    _prefix = convertView.findViewById(R.id._prefix);
-            _job.setText(arrayList.get(position).value);
+            TextView text = convertView.findViewById(R.id.textView);
+            text.setText(this.arrayList.get(position).value);
 
-            _prefix.setVisibility(View.GONE);
+            if(MainActivity.jobManager.prepos == position) {
 
-            if(MainActivity.jobManager.folpos == position) {
-
-                String prefix = MainActivity.jobManager.prefixList.size() > 0 ? MainActivity.jobManager.prefixList.get(MainActivity.jobManager.prepos).value : null;
-                prefix = prefix != null ? prefix : "null";
-
-                _job.setTextColor(context.getResources().getColor(R.color.light_blue));
-                _prefix.setVisibility(View.VISIBLE);
-                _prefix.setText( prefix );
+                text.setTextColor(context.getResources().getColor(R.color.light_blue));
             }
-
-            delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    MainActivity.deleteJob(arrayList.get(position));
-                }
-            });
-
-            _prefix.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-
-                    //MainActivity.jobManager.forwardPrefix();
-
-                    ListModalDialog fragment = ListModalDialog.newInstance();
-                    fragment.show(fragmentManager, "HALLO");
-                }
-            });
         }
 
         return convertView;
@@ -117,5 +90,4 @@ public class ListViewAdapter implements ListAdapter {
     public boolean isEmpty() {
         return false;
     }
-
 }

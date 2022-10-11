@@ -98,9 +98,7 @@ public class FakeCameraActivity extends AppCompatActivity {
 
             }
 
-        }
-
-        if (resultCode == RESULT_CANCELED) {
+        } else {
 
             this.finish();
 
@@ -171,13 +169,17 @@ public class FakeCameraActivity extends AppCompatActivity {
 
                 if (files != null) {
 
-                    final String pre = preFix;
+                    final String fix = preFix;
 
-                    files = Arrays.stream(files).filter(e -> e.getName().contains(pre)).toArray(File[]::new);
+                    files = Arrays.stream(files).filter(e -> e.getName().contains(fix)).toArray(File[]::new);
                     File file = files[new Random().nextInt(files.length)];
 
                     Uri fileUri = Uri.fromFile(file);
-                    ImageTools imageTools = new ImageTools(getApplicationContext(), fileUri);
+
+                    InputStream is = getContentResolver().openInputStream(fileUri);
+                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+
+                    ImageTools imageTools = new ImageTools(getApplicationContext(), bitmap, fileUri);
                     imageTools.CropPresisi();
                     imageTools.stampDateGeo();
 

@@ -128,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
         jobManager.prefixList.add(belakang);
 
         checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
-
     }
 
     @Override
@@ -162,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (jobManager.jobList.size() > 0) {
 
-            ListViewAdapter listAdapter = new ListViewAdapter(this, jobManager.jobList);
+            ListViewAdapter listAdapter = new ListViewAdapter(this, getSupportFragmentManager(), jobManager.jobList);
             binding.listView.setAdapter(listAdapter);
             binding.listView.setVisibility(View.VISIBLE);
 

@@ -24,6 +24,7 @@ import androidx.annotation.NonNull;
 
 import com.ilhamb.quickcam.R;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,7 +46,27 @@ public class ImageTools {
         this.imageUri = uri;
         this.bmp = bitmap;
 
-        rotateImageIfRequired();
+
+        try {
+            File file = new File(RealPathUtil.getRealPath(context, this.imageUri));
+            ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            Log.d("EXIF", "Exif: " + orientation);
+            Matrix matrix = new Matrix();
+            if (orientation == 6) {
+                matrix.postRotate(90);
+            }
+            else if (orientation == 3) {
+                matrix.postRotate(180);
+            }
+            else if (orientation == 8) {
+                matrix.postRotate(270);
+            }
+            this.bmp = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(), bmp.getHeight(), matrix, true); // rotating bitmap
+        }
+        catch (Exception e) {
+
+        }
     }
 
     public ImageTools(Context context, Uri uri) throws Exception {
@@ -113,11 +134,17 @@ public class ImageTools {
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
         imageStream = this.ctx.getContentResolver().openInputStream(this.imageUri);
-        Bitmap img = BitmapFactory.decodeStream(imageStream, null, options);
+        Bitmap bitmap = BitmapFactory.decodeStream(imageStream, null, options);
+
+        if(bitmap == null) {
+
+            InputStream is = this.ctx.getContentResolver().openInputStream(this.imageUri);
+            bitmap = BitmapFactory.decodeStream(is);
+        }
 
         rotateImageIfRequired();
 
-        return img;
+        return bitmap;
     }
 
     private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -207,6 +234,8 @@ class Stamp {
 
         this.relasi = Math.sqrt(canvas.getWidth() * canvas.getHeight()) / 250;
 
+        this.padding = (int) (relasi * 15);
+
         this.bitmap = bitmap;
     }
 
@@ -226,14 +255,14 @@ class Stamp {
         int y = bounds.height(),
                 x = bounds.width();
 
-        int height = y + padding*2;
+        int height = y + padding;
         Bitmap layer = Bitmap.createBitmap(this.bitmap.getWidth(), height, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(layer);
         canvas.drawColor(Color.TRANSPARENT);
         canvas.drawBitmap(layer, 0, y, paint);
 
-        canvas.drawText(txt, padding, y + padding, paint);
-        this.canvas.drawBitmap(layer, 0, this.bitmap.getHeight()-height, null);
+        canvas.drawText(txt, padding, y, paint);
+        this.canvas.drawBitmap(layer, 0, this.bitmap.getHeight() - height, null);
 
     }
 }
