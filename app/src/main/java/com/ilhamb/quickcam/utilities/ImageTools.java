@@ -20,6 +20,8 @@ import android.os.Build;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.ilhamb.quickcam.R;
 
 import java.io.IOException;
@@ -50,38 +52,11 @@ public class ImageTools {
 
         Date currentTime = Calendar.getInstance().getTime();
         String localDate = currentTime.toLocaleString();
-        float textSize = 12f;
 
-        Bitmap newBitmap = Bitmap.createBitmap(this.bmp.getWidth(), this.bmp.getHeight(), Bitmap.Config.ARGB_8888);
+        Stamp stamp = new Stamp(this.bmp);
+        stamp.addText(localDate, 8f);
 
-        Canvas canvas = new Canvas(newBitmap);
-        canvas.drawColor(Color.WHITE);
-        canvas.drawBitmap(this.bmp, 0, 0, null);
-
-        double relation = Math.sqrt(canvas.getWidth() * canvas.getHeight()) / 250;
-
-        Paint paint = new Paint();
-        paint.setColor(Color.WHITE);
-        paint.setTypeface(Typeface.DEFAULT);
-        paint.setTextSize((float) (textSize * relation));
-
-        Bitmap icon = drawableToBitmap(ctx.getDrawable(R.drawable.ic_baseline_location_on_24));
-        icon = changeColor(icon, Color.BLACK, Color.WHITE);
-        icon = resizeBitmap(icon, (int) (25 * relation), (int) (25 * relation));
-
-        int extra = 25;
-        int layerH = (int) (icon.getHeight() + textSize) + extra;
-        Bitmap loc = Bitmap.createBitmap(bmp.getWidth(), layerH, Bitmap.Config.ARGB_8888);
-
-        Canvas canvas1 = new Canvas(loc);
-        canvas1.drawColor(ctx.getResources().getColor(R.color.alpha_color));
-
-        canvas1.drawBitmap(icon, 0, 0, null);
-        canvas1.drawText(city, icon.getWidth(), icon.getHeight(), paint);
-        canvas1.drawText(localDate, extra/2, layerH -extra/2 , paint);
-
-        canvas.drawBitmap(loc, 0, (canvas.getHeight() - layerH), paint);
-        this.bmp = newBitmap;
+        this.bmp = stamp.bitmap;
     }
 
     public void CropPresisi() {
@@ -270,5 +245,53 @@ public class ImageTools {
                 bm, 0, 0, width, height, matrix, false);
         bm.recycle();
         return resizedBitmap;
+    }
+}
+
+class Stamp {
+
+    public Bitmap bitmap;
+    public Canvas canvas;
+    private double relasi;
+
+    int padding = 15;
+
+    public Stamp(Bitmap bmp) {
+
+        Bitmap bitmap = Bitmap.createBitmap(bmp.getWidth(), bmp.getHeight(), Bitmap.Config.ARGB_8888);
+        this.canvas = new Canvas(bitmap);
+        canvas.drawColor(Color.BLACK);
+        canvas.drawBitmap(bmp, 0, 0, null);
+
+        this.relasi = Math.sqrt(canvas.getWidth() * canvas.getHeight()) / 250;
+
+        this.bitmap = bitmap;
+    }
+
+
+
+
+    public void addText(@NonNull String txt,@NonNull float size) {
+
+
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setTextSize((float) (relasi*size));
+
+        Rect bounds = new Rect();
+        paint.getTextBounds(txt, 0, txt.length(), bounds);
+
+        int y = bounds.height(),
+                x = bounds.width();
+
+        int height = y + padding*2;
+        Bitmap layer = Bitmap.createBitmap(this.bitmap.getWidth(), height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(layer);
+        canvas.drawColor(Color.TRANSPARENT);
+        canvas.drawBitmap(layer, 0, y, paint);
+
+        canvas.drawText(txt, padding, y + padding, paint);
+        this.canvas.drawBitmap(layer, 0, this.bitmap.getHeight()-height, null);
+
     }
 }

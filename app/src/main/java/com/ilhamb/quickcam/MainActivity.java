@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
         Prefix prefix = new Prefix();
         prefix.value = "images";
-       // jobManager.prefixList.add(prefix);
+        jobManager.prefixList.add(prefix);
 
         Prefix depan = new Prefix();
         depan.value = "Depan ";
