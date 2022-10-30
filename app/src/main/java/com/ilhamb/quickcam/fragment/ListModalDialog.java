@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 import com.ilhamb.quickcam.MainActivity;
 import com.ilhamb.quickcam.R;
@@ -20,6 +21,7 @@ import com.ilhamb.quickcam.adapter.ModalListViewAdapter;
 import com.ilhamb.quickcam.database.Job;
 import com.ilhamb.quickcam.database.Prefix;
 import com.ilhamb.quickcam.databinding.FragmentDialogBinding;
+import com.ilhamb.quickcam.utilities.TODO;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -30,13 +32,18 @@ import java.util.stream.Stream;
  * create an instance of this fragment.
  */
 public class ListModalDialog extends DialogFragment {
+    private static int viewPosition;
 
     public ListModalDialog() {
         // Required empty public constructor
     }
 
-    public static ListModalDialog newInstance() {
+
+    public static ListModalDialog newInstance(int position) {
+
         ListModalDialog fragment = new ListModalDialog();
+        viewPosition = position;
+
         return fragment;
     }
 
@@ -56,6 +63,7 @@ public class ListModalDialog extends DialogFragment {
         return binding.getRoot();
     }
 
+    TODO todo;
     Dialog dialog;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -85,10 +93,21 @@ public class ListModalDialog extends DialogFragment {
 
                     ModalListViewAdapter adapter = new ModalListViewAdapter(getContext(), preList);
                     binding.PreList.setAdapter(adapter);
+
+                    ListModalDialog.this.dialog.dismiss();
+
+                    if(todo != null) {
+
+                        todo.onCallBack(viewPosition, preList.get(i).value);
+                    }
                 }
 
             }
         });
 
+    }
+
+    public void onSave(TODO todo) {
+        this.todo = todo;
     }
 }

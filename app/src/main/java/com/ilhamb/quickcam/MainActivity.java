@@ -14,7 +14,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -100,8 +102,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
+                for( int x = 0; x < binding.listView.getChildCount(); x++) {
+
+                    View vg =  binding.listView.getChildAt(x);
+                    TextView tv =  vg.findViewById(R.id._job),
+                             pr = vg.findViewById(R.id._prefix);
+
+                    pr.setVisibility(View.GONE);
+                    tv.setTextColor(getResources().getColor(R.color.light_gray));
+                }
+
                 jobManager.setJobPos(i);
-                updateListView();
+
+                View Cvg = binding.listView.getChildAt(i);
+                TextView tv =  Cvg.findViewById(R.id._job),
+                         pr = Cvg.findViewById(R.id._prefix);
+                tv.setTextColor(getResources().getColor(R.color.light_blue));
+                pr.setVisibility(View.VISIBLE);
+                pr.setText(jobManager.prefixList.get(jobManager.prepos).value);
+               // updateListView();
             }
         });
 
@@ -149,6 +168,11 @@ public class MainActivity extends AppCompatActivity {
 
                                 updateListView();
                             }
+
+                            @Override
+                            public void onCallBack(int key, String data) {
+
+                            }
                         });
                     }
                     break;
@@ -187,6 +211,11 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess() {
 
                 viewModel.setLiveDataJob(jobManager.jobList);
+            }
+
+            @Override
+            public void onCallBack(int key, String data) {
+
             }
         });
     }

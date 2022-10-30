@@ -14,6 +14,7 @@ import com.ilhamb.quickcam.MainActivity;
 import com.ilhamb.quickcam.R;
 import com.ilhamb.quickcam.database.Job;
 import com.ilhamb.quickcam.fragment.ListModalDialog;
+import com.ilhamb.quickcam.utilities.TODO;
 
 import java.util.List;
 
@@ -97,7 +98,19 @@ public class ListViewAdapter implements ListAdapter {
 
                     //MainActivity.jobManager.forwardPrefix();
 
-                    ListModalDialog fragment = ListModalDialog.newInstance();
+                    ListModalDialog fragment = ListModalDialog.newInstance(position);
+                    fragment.onSave(new TODO() {
+                        @Override
+                        public void onSuccess() {
+
+                        }
+
+                        @Override
+                        public void onCallBack(int key, String data) {
+
+                            _prefix.setText(data);
+                        }
+                    });
                     fragment.show(fragmentManager, "HALLO");
                 }
             });
