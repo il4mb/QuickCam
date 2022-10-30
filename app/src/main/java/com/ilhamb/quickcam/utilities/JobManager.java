@@ -2,6 +2,7 @@ package com.ilhamb.quickcam.utilities;
 
 import android.util.Log;
 
+import com.ilhamb.quickcam.MainActivity;
 import com.ilhamb.quickcam.database.Job;
 import com.ilhamb.quickcam.database.Prefix;
 

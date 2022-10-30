@@ -14,12 +14,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 import com.ilhamb.quickcam.adapter.ListViewAdapter;
 import com.ilhamb.quickcam.database.DataBase;
 import com.ilhamb.quickcam.database.Job;
@@ -30,7 +28,6 @@ import com.ilhamb.quickcam.utilities.TODO;
 import com.ilhamb.quickcam.utilities.DataViewModel;
 import com.ilhamb.quickcam.utilities.JobManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,12 +62,12 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getJobData().observe(this, val -> {
 
             jobManager.setJobList(val);
-            updateListView();
+            createListView();
         });
         viewModel.getPrefixData().observe(this, val -> {
 
             jobManager.setPrefixList(val);
-            updateListView();
+            createListView();
         });
 
 
@@ -102,28 +99,53 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
-                for( int x = 0; x < binding.listView.getChildCount(); x++) {
-
-                    View vg =  binding.listView.getChildAt(x);
-                    TextView tv =  vg.findViewById(R.id._job),
-                             pr = vg.findViewById(R.id._prefix);
-
-                    pr.setVisibility(View.GONE);
-                    tv.setTextColor(getResources().getColor(R.color.light_gray));
-                }
-
-                jobManager.setJobPos(i);
-
-                View Cvg = binding.listView.getChildAt(i);
-                TextView tv =  Cvg.findViewById(R.id._job),
-                         pr = Cvg.findViewById(R.id._prefix);
-                tv.setTextColor(getResources().getColor(R.color.light_blue));
-                pr.setVisibility(View.VISIBLE);
-                pr.setText(jobManager.prefixList.get(jobManager.prepos).value);
-               // updateListView();
+                updateListView(i, view);
             }
         });
 
+        // CREATE DEFAULT VALUE FOR PREFIX DATA
+        defaultPrex();
+
+        // CHECK STORAGE PERMISSION
+        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
+    }
+
+    private void updateListView(int i, View v) {
+
+        for (int x = 0; x < binding.listView.getChildCount(); x++) {
+
+            View vg = binding.listView.getChildAt(x);
+            TextView tv = vg.findViewById(R.id._job),
+                    pr = vg.findViewById(R.id._prefix);
+
+            pr.setVisibility(View.GONE);
+            tv.setTextColor(getResources().getColor(R.color.light_gray));
+        }
+
+        jobManager.setJobPos(i);
+
+        TextView tv = v.findViewById(R.id._job),
+                pr = v.findViewById(R.id._prefix);
+        tv.setTextColor(getResources().getColor(R.color.light_blue));
+        pr.setVisibility(View.VISIBLE);
+        pr.setText(jobManager.prefixList.get(jobManager.prepos).value);
+
+    }
+
+    private void createListView() {
+
+        binding.listView.setVisibility(View.GONE);
+
+        if (jobManager.jobList.size() > 0) {
+
+            ListViewAdapter listAdapter = new ListViewAdapter(this, getSupportFragmentManager(), jobManager.jobList);
+            binding.listView.setAdapter(listAdapter);
+            binding.listView.setVisibility(View.VISIBLE);
+
+        }
+    }
+
+    private void defaultPrex() {
         Prefix prefix = new Prefix();
         prefix.value = "images";
         // jobManager.prefixList.add(prefix);
@@ -145,8 +167,6 @@ public class MainActivity extends AppCompatActivity {
         jobManager.prefixList.add(ruangan);
         jobManager.prefixList.add(booth);
         jobManager.prefixList.add(belakang);
-
-        checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
     }
 
     @Override
@@ -166,7 +186,10 @@ public class MainActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess() {
 
-                                updateListView();
+                                if (MainActivity.viewModel != null) {
+
+                                    MainActivity.viewModel.setLiveDataJob(jobManager.jobList);
+                                }
                             }
 
                             @Override
@@ -179,24 +202,6 @@ public class MainActivity extends AppCompatActivity {
             }
     }
 
-    private void updateListView() {
-
-        binding.listView.setVisibility(View.GONE);
-
-        if (jobManager.jobList.size() > 0) {
-
-            ListViewAdapter listAdapter = new ListViewAdapter(this, getSupportFragmentManager(), jobManager.jobList);
-            binding.listView.setAdapter(listAdapter);
-            binding.listView.setVisibility(View.VISIBLE);
-
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        updateListView();
-    }
 
     private void testMode() {
 
@@ -221,20 +226,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Function to check and request permission
-    public void checkPermission(String permission, int requestCode)
-    {
+    public void checkPermission(String permission, int requestCode) {
         // Checking if permission is not granted
         if (ContextCompat.checkSelfPermission(MainActivity.this, permission) == PackageManager.PERMISSION_DENIED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[] { permission }, requestCode);
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{permission}, requestCode);
         }
     }
 
-
-
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
-                                           @NonNull int[] grantResults)
-    {
+                                           @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == CAMERA_PERMISSION_CODE) {
@@ -244,17 +245,14 @@ public class MainActivity extends AppCompatActivity {
 
                 // Showing the toast message
                 Toast.makeText(MainActivity.this, "Camera Permission Granted", Toast.LENGTH_SHORT).show();
-            }
-            else {
+            } else {
                 Toast.makeText(MainActivity.this, "Camera Permission Denied", Toast.LENGTH_SHORT).show();
             }
-        }
-        else if (requestCode == STORAGE_PERMISSION_CODE) {
+        } else if (requestCode == STORAGE_PERMISSION_CODE) {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(MainActivity.this, "Storage Permission Granted", Toast.LENGTH_SHORT).show();
-            }
-            else {
+            } else {
                 Toast.makeText(MainActivity.this, "Storage Permission Denied", Toast.LENGTH_SHORT).show();
 
                 checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
