@@ -62,18 +62,8 @@ public class ListViewAdapter extends BaseAdapter {
 
             viewHolder.jobView.setText(arrayList.get(position).value);
             viewHolder.prexView.setVisibility(View.GONE);
-
-            if (jobManager.folpos == position) {
-
-                String prefix = jobManager.prefixList.size() > 0 ? jobManager.prefixList.get(jobManager.prepos).value : null;
-                prefix = prefix != null ? prefix : "null";
-
-                viewHolder.jobView.setTextColor(context.getResources().getColor(R.color.light_blue));
-                viewHolder.prexView.setVisibility(View.VISIBLE);
-                viewHolder.prexView.setText(prefix);
-            }
-
             convertView.setTag(viewHolder);
+
         } else {
 
             viewHolder = (ViewHolder) convertView.getTag();
@@ -81,6 +71,16 @@ public class ListViewAdapter extends BaseAdapter {
 
         viewHolder.jobView.setText(arrayList.get(position).value);
         viewHolder.prexView.setVisibility(View.GONE);
+
+        if (jobManager.folpos == position) {
+
+            String prefix = jobManager.prefixList.size() > 0 ? jobManager.prefixList.get(jobManager.prepos).value : null;
+            prefix = prefix != null ? prefix : "null";
+
+            viewHolder.jobView.setTextColor(context.getResources().getColor(R.color.light_blue));
+            viewHolder.prexView.setVisibility(View.VISIBLE);
+            viewHolder.prexView.setText(prefix);
+        }
 
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -116,11 +116,13 @@ public class ListViewAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
+
         TextView jobView;
         TextView prexView;
         TextView delete;
 
         public ViewHolder(View view) {
+
             jobView = (TextView) view.findViewById(R.id._job);
             prexView = (TextView) view.findViewById(R.id._prefix);
             delete = (TextView) view.findViewById(R.id.delete);

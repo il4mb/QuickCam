@@ -80,7 +80,7 @@ public class FakeCameraActivity extends AppCompatActivity {
 
                             ImageTools imageTools = new ImageTools(getApplicationContext(), bitmap, data.getData());
                             imageTools.CropPresisi();
-                            imageTools.stampDateGeo();
+                            imageTools.stampDateGeo(null);
                             handleImage(imageTools.getBitmap());
 
                         } catch (Exception e) {
@@ -152,20 +152,22 @@ public class FakeCameraActivity extends AppCompatActivity {
 
                 String preFix = null;
                 String directory = null;
+                String stamp = null;
 
                 try {
 
                     preFix = MainActivity.jobManager.prefixList.get(cps).value;
                     directory = MainActivity.jobManager.jobList.get(cds).value;
+                    stamp = MainActivity.jobManager.jobList.get(cds).text;
 
                 } catch (Exception e){  throw new Exception(e.getMessage()); }
 
-                Log.d("FOLDER", directory);
-                Log.d("PREFIX", preFix);
+               // Log.d("FOLDER", directory);
+               // Log.d("PREFIX", preFix);
 
                 File[] files = getChildFileList(Uri.parse(directory));
 
-                Log.d("FILES", new Gson().toJson(files));
+                // Log.d("FILES", new Gson().toJson(files));
 
                 if (files != null) {
 
@@ -181,7 +183,7 @@ public class FakeCameraActivity extends AppCompatActivity {
 
                     ImageTools imageTools = new ImageTools(getApplicationContext(), bitmap, fileUri);
                     imageTools.CropPresisi();
-                    imageTools.stampDateGeo();
+                    imageTools.stampDateGeo(stamp);
 
                     MainActivity.jobManager.forwardPrefix();
 

@@ -19,17 +19,22 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
 import com.ilhamb.quickcam.R;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 public class ImageTools {
@@ -46,8 +51,8 @@ public class ImageTools {
         this.imageUri = uri;
         this.bmp = bitmap;
 
-
         try {
+
             File file = new File(RealPathUtil.getRealPath(context, this.imageUri));
             ExifInterface exif = new ExifInterface(file.getAbsolutePath());
             int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
@@ -78,13 +83,22 @@ public class ImageTools {
 
     }
 
-    public void stampDateGeo() {
+    public void stampDateGeo(String _text) {
 
         Date currentTime = Calendar.getInstance().getTime();
         String localDate = currentTime.toLocaleString();
 
         Stamp stamp = new Stamp(this.bmp);
-        stamp.addText(localDate, 8f);
+
+        if(_text != null && _text.length() >= 0) {
+
+            String[] text = {localDate, _text};
+            stamp.addTexts(text, 8f);
+
+        } else {
+
+            stamp.addText(localDate, 8f);
+        }
 
         this.bmp = stamp.bitmap;
     }
@@ -240,10 +254,21 @@ class Stamp {
     }
 
 
+    public void addTexts(String[] strings, float size) {
+
+        List<String> arr = Arrays.asList(strings);
+        int len = arr.size();
+        for(int i = 0; i <= len; i++) {
+            len--;
+
+            this.addText(arr.get(len), size);
+
+        }
+    }
 
 
+    float textHeight = 0;
     public void addText(@NonNull String txt,@NonNull float size) {
-
 
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
@@ -251,6 +276,9 @@ class Stamp {
 
         Rect bounds = new Rect();
         paint.getTextBounds(txt, 0, txt.length(), bounds);
+
+        Paint.FontMetrics fm = paint.getFontMetrics();
+        textHeight += fm.descent - fm.ascent;
 
         int y = bounds.height(),
                 x = bounds.width();
@@ -262,7 +290,7 @@ class Stamp {
         canvas.drawBitmap(layer, 0, y, paint);
 
         canvas.drawText(txt, padding, y, paint);
-        this.canvas.drawBitmap(layer, 0, this.bitmap.getHeight() - height, null);
+        this.canvas.drawBitmap(layer, 0, (this.bitmap.getHeight() - height) - textHeight, null);
 
     }
 }

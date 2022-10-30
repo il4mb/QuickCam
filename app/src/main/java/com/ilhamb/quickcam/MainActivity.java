@@ -124,6 +124,28 @@ public class MainActivity extends AppCompatActivity {
         checkPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, STORAGE_PERMISSION_CODE);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        viewModel.getPrefixData().observe(this, val -> {
+
+            jobManager.setPrefixList(val);
+            createListView();
+        });
+        viewModel.getJobData().observe(this, val -> {
+
+            jobManager.setJobList(val);
+            createListView();
+
+            if(jobManager.jobList.size() <= 0) {
+
+                binding.jobSet.setClickable(false);
+
+            } else binding.jobSet.setClickable(true);
+        });
+    }
+
     private void updateListView(int i, View v) {
 
         for (int x = 0; x < binding.listView.getChildCount(); x++) {
