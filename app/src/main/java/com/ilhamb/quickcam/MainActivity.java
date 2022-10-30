@@ -23,6 +23,7 @@ import com.ilhamb.quickcam.database.DataBase;
 import com.ilhamb.quickcam.database.Job;
 import com.ilhamb.quickcam.database.Prefix;
 import com.ilhamb.quickcam.databinding.ActivityMainBinding;
+import com.ilhamb.quickcam.fragment.JobSettingFragment;
 import com.ilhamb.quickcam.utilities.RealPathUtil;
 import com.ilhamb.quickcam.utilities.TODO;
 import com.ilhamb.quickcam.utilities.DataViewModel;
@@ -63,6 +64,12 @@ public class MainActivity extends AppCompatActivity {
 
             jobManager.setJobList(val);
             createListView();
+
+            if(jobManager.jobList.size() <= 0) {
+
+                binding.jobSet.setClickable(false);
+
+            } else binding.jobSet.setClickable(true);
         });
         viewModel.getPrefixData().observe(this, val -> {
 
@@ -100,6 +107,13 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                 updateListView(i, view);
+            }
+        });
+        binding.jobSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JobSettingFragment jobSettingFragment = JobSettingFragment.newInstance();
+                jobSettingFragment.show(getSupportFragmentManager(), "setjob");
             }
         });
 

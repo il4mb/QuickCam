@@ -60,7 +60,7 @@ public class ListViewAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(context).inflate(R.layout.custom_listview, null);
             viewHolder = new ViewHolder(convertView);
 
-            viewHolder.jobView.setText(arrayList.get(position).value + " " + String.valueOf(position));
+            viewHolder.jobView.setText(arrayList.get(position).value);
             viewHolder.prexView.setVisibility(View.GONE);
 
             if (jobManager.folpos == position) {
@@ -79,7 +79,7 @@ public class ListViewAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        viewHolder.jobView.setText(arrayList.get(position).value + " " + String.valueOf(position));
+        viewHolder.jobView.setText(arrayList.get(position).value);
         viewHolder.prexView.setVisibility(View.GONE);
 
         viewHolder.delete.setOnClickListener(new View.OnClickListener() {

@@ -1,5 +1,7 @@
 package com.ilhamb.quickcam.utilities;
 
+import static com.ilhamb.quickcam.MainActivity.viewModel;
+
 import android.util.Log;
 
 import com.ilhamb.quickcam.MainActivity;
